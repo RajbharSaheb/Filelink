@@ -1,58 +1,52 @@
-from flask import Flask, send_file, render_template, abort
-import os, json, time
-from threading import Thread
+from flask import Flask, send_file, render_template
+import os, time, json, threading
 
-app = Flask(__name__, template_folder="templates")
+app = Flask(__name__)
 FILE_DB = "files.json"
 EXPIRY_SECONDS = 36000  # 10 hours
-
-# Create empty files.json if it doesn't exist
-if not os.path.exists("files.json"):
-    with open("files.json", "w") as f:
-        json.dump({}, f)
-
-if not os.path.exists("temp"):
-    os.makedirs("temp")
-
-def load_file_info(file_id):
-    with open(FILE_DB, "r") as f:
-        data = json.load(f)
-    return data.get(file_id)
-
-@app.route("/file/<file_id>")
-def download_file(file_id):
-    info = load_file_info(file_id)
-    if not info or not os.path.exists(info["path"]):
-        return abort(404)
-    return send_file(info["path"], download_name=info["filename"], as_attachment=True)
-
-@app.route("/watch/<file_id>")
-def stream_file(file_id):
-    info = load_file_info(file_id)
-    if not info or not os.path.exists(info["path"]):
-        return abort(404)
-    stream_url = f"/file/{file_id}"
-    return render_template("video.html", filename=info["filename"], stream_url=stream_url)
+TEMP_DIR = "temp"
 
 def cleanup_old_files():
     while True:
-        now = int(time.time())
-        with open(FILE_DB, "r") as f:
-            data = json.load(f)
-        updated = {}
-        for fid, info in data.items():
-            if now - info["timestamp"] < EXPIRY_SECONDS:
-                updated[fid] = info
-            else:
-                try:
-                    os.remove(info["path"])
-                except: pass
-        with open(FILE_DB, "w") as f:
-            json.dump(updated, f)
-        time.sleep(3600)  # Clean every hour
+        if os.path.exists(FILE_DB):
+            with open(FILE_DB, "r") as f:
+                data = json.load(f)
+            to_delete = []
+            for file_id, info in data.items():
+                if time.time() - info["timestamp"] > EXPIRY_SECONDS:
+                    try:
+                        os.remove(info["path"])
+                    except:
+                        pass
+                    to_delete.append(file_id)
+            for file_id in to_delete:
+                del data[file_id]
+            with open(FILE_DB, "w") as f:
+                json.dump(data, f)
+        time.sleep(600)
 
-Thread(target=cleanup_old_files, daemon=True).start()
+@app.route('/watch/<file_id>')
+def stream(file_id):
+    if not os.path.exists(FILE_DB):
+        return "File DB not found", 404
+    with open(FILE_DB, "r") as f:
+        data = json.load(f)
+    if file_id not in data:
+        return "File not found", 404
+    return render_template("watch.html", filename=data[file_id]["filename"], file_id=file_id)
+
+@app.route('/file/<file_id>')
+def download(file_id):
+    if not os.path.exists(FILE_DB):
+        return "File DB not found", 404
+    with open(FILE_DB, "r") as f:
+        data = json.load(f)
+    if file_id not in data or not os.path.exists(data[file_id]["path"]):
+        return "File not found", 404
+    return send_file(data[file_id]["path"], as_attachment=True)
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 8080))
-    app.run(host="0.0.0.0", port=port)
+    if not os.path.exists(TEMP_DIR):
+        os.makedirs(TEMP_DIR)
+    threading.Thread(target=cleanup_old_files, daemon=True).start()
+    app.run(host="0.0.0.0", port=8080)
