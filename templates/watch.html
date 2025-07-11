@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>{{ filename }}</title>
+  <style>
+    body { font-family: Arial; background: #111; color: #fff; text-align: center; }
+    video { width: 80%; height: auto; margin-top: 40px; }
+  </style>
+</head>
+<body>
+  <h2>🎬 Streaming: {{ filename }}</h2>
+  <video controls>
+    <source src="/file/{{ file_id }}" type="video/mp4">
+    Your browser does not support the video tag.
+  </video>
+</body>
+</html>
