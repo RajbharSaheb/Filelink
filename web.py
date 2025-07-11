@@ -6,6 +6,11 @@ app = Flask(__name__, template_folder="templates")
 FILE_DB = "files.json"
 EXPIRY_SECONDS = 36000  # 10 hours
 
+# Create empty files.json if it doesn't exist
+if not os.path.exists("files.json"):
+    with open("files.json", "w") as f:
+        json.dump({}, f)
+
 if not os.path.exists("temp"):
     os.makedirs("temp")
 
