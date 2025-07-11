@@ -2,15 +2,17 @@ from pyrogram import Client, filters
 from pyrogram.types import Message
 import os, uuid, time, json
 from pymongo import MongoClient
+from dotenv import load_dotenv
 
-API_ID = int(os.environ.get("API_ID"))
-API_HASH = os.environ.get("API_HASH")
-BOT_TOKEN = os.environ.get("BOT_TOKEN")
-BASE_URL = os.environ.get("BASE_URL", "http://localhost:8080")
-OWNER_ID = int(os.environ.get("OWNER_ID"))
+load_dotenv()
 
-# MongoDB setup
-MONGO_URL = os.environ.get("MONGO_URL")
+API_ID = int(os.getenv("API_ID"))
+API_HASH = os.getenv("API_HASH")
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+BASE_URL = os.getenv("BASE_URL", "http://localhost:8080")
+OWNER_ID = int(os.getenv("OWNER_ID"))
+
+MONGO_URL = os.getenv("MONGO_URL")
 mongo = MongoClient(MONGO_URL)
 db = mongo["filetolink"]
 users_col = db["users"]
@@ -59,19 +61,16 @@ async def handle_file(c: Client, m: Message):
 async def broadcast(c, m):
     if len(m.command) < 2:
         return await m.reply("ℹ️ Broadcast text दो:\n`/broadcast Hello all!`")
-
     text = m.text.split(" ", 1)[1]
     users = users_col.find()
     sent, fail = 0, 0
-
     for user in users:
         try:
             await c.send_message(user["_id"], text)
             sent += 1
         except:
             fail += 1
-            users_col.delete_one({"_id": user["_id"]})  # Auto cleanup
-
+            users_col.delete_one({"_id": user["_id"]})
     await m.reply(f"📢 Broadcast Complete\n✅ Sent: {sent}\n❌ Failed: {fail}")
 
 app.run()
