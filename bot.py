@@ -102,10 +102,19 @@ async def handle_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
     add_user(user.id)
     if is_banned(user.id):
         return
-    media = update.message.document or update.message.video or update.message.audio or (update.message.photo[-1] if update.message.photo else None)
+
+    message = update.message
+    media = (
+        message.document or
+        message.video or
+        message.audio or
+        (message.photo[-1] if message.photo else None)
+    )
+
     if not media:
         await update.message.reply_text("❌ Unsupported media.")
         return
+
     file_id = media.file_id
     secure_url = f"{BASE_URL}/d/{file_id}"
     await update.message.reply_text(
@@ -134,9 +143,6 @@ if __name__ == "__main__":
     app.add_handler(CommandHandler("ban", ban))
     app.add_handler(CommandHandler("unban", unban))
     app.add_handler(CallbackQueryHandler(buttons))
-    app.add_handler(MessageHandler(
-        filters.Document | filters.Video | filters.Audio | filters.PHOTO,
-        handle_file
-    ))
+    app.add_handler(MessageHandler(filters.ATTACHMENT, handle_file))  # ✅ WORKING FILTER
     print("🤖 Bot running...")
     app.run_polling()
