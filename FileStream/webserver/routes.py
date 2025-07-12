@@ -1,3 +1,4 @@
+
 from fastapi import FastAPI
 from fastapi.responses import FileResponse, HTMLResponse
 from FileStream.config import DOWNLOAD_DIR, PORT
@@ -15,3 +16,7 @@ async def serve_file(file_name: str):
 
 def run_webserver():
     uvicorn.run(app, host="0.0.0.0", port=PORT)
+
+@app.get("/")
+async def home():
+    return {"status": "Bot & Stream Server Running ✅"}
