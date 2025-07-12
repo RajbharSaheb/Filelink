@@ -1,7 +1,7 @@
 import os
 from dotenv import load_dotenv
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import (ApplicationBuilder, CommandHandler, MessageHandler, filters,
+from telegram.ext import filters as tg_filters (ApplicationBuilder, CommandHandler, MessageHandler, filters,
                           ContextTypes, CallbackQueryHandler)
 
 from db import add_user, is_banned, total_users, banned_users, ban_user, unban_user, get_all_users
@@ -133,6 +133,6 @@ if __name__ == "__main__":
     app.add_handler(CommandHandler("ban", ban))
     app.add_handler(CommandHandler("unban", unban))
     app.add_handler(CallbackQueryHandler(buttons))
-    app.add_handler(MessageHandler(filters.ALL & (filters.DOCUMENT | filters.VIDEO | filters.AUDIO | filters.PHOTO), handle_file))
+    app.add_handler(MessageHandler(tg_filters.Document.ALL | tg_filters.Video.ALL | tg_filters.Audio.ALL | tg_filters.PHOTO, handle_file))
     print("🤖 Bot running...")
     app.run_polling()
