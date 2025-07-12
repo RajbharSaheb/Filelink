@@ -1,9 +1,9 @@
 import os
 from dotenv import load_dotenv
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import filters as tg_filters (ApplicationBuilder, CommandHandler, MessageHandler, filters,
+from telegram.ext import (ApplicationBuilder, CommandHandler, MessageHandler, filters,
                           ContextTypes, CallbackQueryHandler)
-
+from telegram.ext import filters as tg_filters
 from db import add_user, is_banned, total_users, banned_users, ban_user, unban_user, get_all_users
 
 load_dotenv()
