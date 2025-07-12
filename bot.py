@@ -106,7 +106,7 @@ async def handle_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("❌ Unsupported media.")
         return
     file_id = media.file_id
-    secure_url = f"{BASE_URL}/d/{file_id}""
+    secure_url = f"{BASE_URL}/d/{file_id}"
     await update.message.reply_text(
         f"✅ Link Ready\n\n📥 [Download / Watch]({secure_url})",
         disable_web_page_preview=True
