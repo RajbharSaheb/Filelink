@@ -1,52 +1,24 @@
-from flask import Flask, send_file, render_template
-import os, time, json, threading
+from flask import Flask, send_file, render_template, abort from pymongo import MongoClient import os, time
 
-app = Flask(__name__)
-FILE_DB = "files.json"
-EXPIRY_SECONDS = 36000  # 10 hours
-TEMP_DIR = "temp"
+app = Flask(name)
 
-def cleanup_old_files():
-    while True:
-        if os.path.exists(FILE_DB):
-            with open(FILE_DB, "r") as f:
-                data = json.load(f)
-            to_delete = []
-            for file_id, info in data.items():
-                if time.time() - info["timestamp"] > EXPIRY_SECONDS:
-                    try:
-                        os.remove(info["path"])
-                    except:
-                        pass
-                    to_delete.append(file_id)
-            for file_id in to_delete:
-                del data[file_id]
-            with open(FILE_DB, "w") as f:
-                json.dump(data, f)
-        time.sleep(600)
+MONGO_URL = os.getenv("MONGO_URL") mongo = MongoClient(MONGO_URL) db = mongo["filetolink"] files = db["files"]
 
-@app.route('/watch/<file_id>')
-def stream(file_id):
-    if not os.path.exists(FILE_DB):
-        return "File DB not found", 404
-    with open(FILE_DB, "r") as f:
-        data = json.load(f)
-    if file_id not in data:
-        return "File not found", 404
-    return render_template("watch.html", filename=data[file_id]["filename"], file_id=file_id)
+@app.route("/file/<file_id>") def serve_file(file_id): file_data = files.find_one({"file_id": file_id}) if not file_data: return abort(404)
 
-@app.route('/file/<file_id>')
-def download(file_id):
-    if not os.path.exists(FILE_DB):
-        return "File DB not found", 404
-    with open(FILE_DB, "r") as f:
-        data = json.load(f)
-    if file_id not in data or not os.path.exists(data[file_id]["path"]):
-        return "File not found", 404
-    return send_file(data[file_id]["path"], as_attachment=True)
+path = f"temp/{file_id}_{file_data['file_name']}"
+if os.path.exists(path):
+    return send_file(path, as_attachment=True)
+return abort(404)
 
-if __name__ == "__main__":
-    if not os.path.exists(TEMP_DIR):
-        os.makedirs(TEMP_DIR)
-    threading.Thread(target=cleanup_old_files, daemon=True).start()
-    app.run(host="0.0.0.0", port=8080)
+@app.route("/watch/<file_id>") def stream_file(file_id): file_data = files.find_one({"file_id": file_id}) if not file_data: return abort(404)
+
+path = f"temp/{file_id}_{file_data['file_name']}"
+if os.path.exists(path):
+    return render_template("watch.html", filename=file_data['file_name'], file_id=file_id)
+return abort(404)
+
+def cleanup_expired_files(): now = int(time.time()) expired = files.find({"timestamp": {"$lt": now - 36000}})  # 10 hours for file in expired: path = f"temp/{file['file_id']}_{file['file_name']}" if os.path.exists(path): os.remove(path) files.delete_one({"file_id": file['file_id']})
+
+if name == "main": cleanup_expired_files() app.run(host="0.0.0.0", port=8080)
+
