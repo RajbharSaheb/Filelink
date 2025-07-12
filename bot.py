@@ -133,6 +133,6 @@ if __name__ == "__main__":
     app.add_handler(CommandHandler("ban", ban))
     app.add_handler(CommandHandler("unban", unban))
     app.add_handler(CallbackQueryHandler(buttons))
-    app.add_handler(MessageHandler(filters.ALL & (filters.Document.ALL | filters.Video.ALL | filters.Audio.ALL | filters.PHOTO), handle_file))
+    app.add_handler(MessageHandler(filters.ALL & (filters.DOCUMENT | filters.VIDEO | filters.AUDIO | filters.PHOTO), handle_file))
     print("🤖 Bot running...")
     app.run_polling()
