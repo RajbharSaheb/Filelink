@@ -7,6 +7,10 @@ import uvicorn
 
 app = FastAPI()
 
+@app.get("/")
+async def home():
+    return {"status": "Bot & Stream Server Running ✅"}
+
 @app.get("/file/{file_name}")
 async def serve_file(file_name: str):
     file_path = os.path.join(DOWNLOAD_DIR, file_name)
@@ -17,6 +21,3 @@ async def serve_file(file_name: str):
 def run_webserver():
     uvicorn.run(app, host="0.0.0.0", port=PORT)
 
-@app.get("/")
-async def home():
-    return {"status": "Bot & Stream Server Running ✅"}
