@@ -99,6 +99,9 @@ async def unban(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # When user sends a file
 async def handle_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
+    if not user:
+        return  # Ignore if no user (e.g., anonymous or system message)
+
     add_user(user.id)
     if is_banned(user.id):
         return
