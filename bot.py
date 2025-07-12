@@ -10,6 +10,7 @@ load_dotenv()
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 OWNER_ID = int(os.getenv("OWNER_ID"))
 CHANNEL_LINK = os.getenv("CHANNEL_LINK")
+BASE_URL = os.getenv("BASE_URL")
 
 START_TEXT = """
 🌟 Welcome, {name}! 🌟
@@ -105,7 +106,7 @@ async def handle_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("❌ Unsupported media.")
         return
     file_id = media.file_id
-    secure_url = f"https://yourdomain.com/d/{file_id}"
+    secure_url = f"{BASE_URL}/d/{file_id}""
     await update.message.reply_text(
         f"✅ Link Ready\n\n📥 [Download / Watch]({secure_url})",
         disable_web_page_preview=True
