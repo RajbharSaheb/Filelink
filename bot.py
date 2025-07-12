@@ -135,7 +135,7 @@ if __name__ == "__main__":
     app.add_handler(CommandHandler("unban", unban))
     app.add_handler(CallbackQueryHandler(buttons))
     app.add_handler(MessageHandler(
-        filters.Document.ALL | filters.Video.ALL | filters.Audio.ALL | filters.PHOTO,
+        filters.Document | filters.Video | filters.Audio | filters.PHOTO,
         handle_file
     ))
     print("🤖 Bot running...")
