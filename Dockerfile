@@ -1,17 +1,18 @@
-# Use official Python image
+# Base image
 FROM python:3.11-slim
 
-# Set workdir
+# Set work directory
 WORKDIR /app
 
-# Copy source files
-COPY . /app
-
 # Install dependencies
+COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Expose Flask port
-EXPOSE 8080
+# Copy source code
+COPY . .
 
-# Start both bot and server
-CMD ["sh", "-c", "python bot.py & python server.py"]
+# Expose FastAPI port
+EXPOSE 8000
+
+# Start the bot and web server together
+CMD ["python", "main.py"]
