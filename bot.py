@@ -1,9 +1,10 @@
 import os
 from dotenv import load_dotenv
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import (ApplicationBuilder, CommandHandler, MessageHandler, filters,
-                          ContextTypes, CallbackQueryHandler)
-from telegram.ext import filters as tg_filters
+from telegram.ext import (
+    ApplicationBuilder, CommandHandler, MessageHandler, CallbackQueryHandler,
+    ContextTypes, filters
+)
 from db import add_user, is_banned, total_users, banned_users, ban_user, unban_user, get_all_users
 
 load_dotenv()
@@ -101,7 +102,7 @@ async def handle_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
     add_user(user.id)
     if is_banned(user.id):
         return
-    media = update.message.document or update.message.video or update.message.audio or update.message.photo[-1]
+    media = update.message.document or update.message.video or update.message.audio or (update.message.photo[-1] if update.message.photo else None)
     if not media:
         await update.message.reply_text("❌ Unsupported media.")
         return
@@ -133,6 +134,9 @@ if __name__ == "__main__":
     app.add_handler(CommandHandler("ban", ban))
     app.add_handler(CommandHandler("unban", unban))
     app.add_handler(CallbackQueryHandler(buttons))
-    app.add_handler(MessageHandler(tg_filters.Document.ALL | tg_filters.Video.ALL | tg_filters.Audio.ALL | tg_filters.PHOTO, handle_file))
+    app.add_handler(MessageHandler(
+        filters.Document.ALL | filters.Video.ALL | filters.Audio.ALL | filters.PHOTO,
+        handle_file
+    ))
     print("🤖 Bot running...")
     app.run_polling()
