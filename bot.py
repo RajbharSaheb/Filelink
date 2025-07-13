@@ -1,35 +1,24 @@
 from pyrogram import Client, filters
-from dotenv import load_dotenv
 import os
-import urllib.parse
 
-# Load .env
-load_dotenv()
+app = Client("my_bot", bot_token=os.getenv("BOT_TOKEN"), api_id=12345, api_hash="yourhash")
 
-API_ID = int(os.getenv("API_ID"))
-API_HASH = os.getenv("API_HASH")
-BOT_TOKEN = os.getenv("BOT_TOKEN")
-DOMAIN = os.getenv("DOMAIN")
-
-bot = Client("media_link_bot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
-
-@bot.on_message(filters.private & (filters.document | filters.video | filters.audio))
-async def handle_media(client, message):
+@app.on_message(filters.document | filters.video | filters.audio)
+async def save_file(client, message):
     media = message.document or message.video or message.audio
-    file_id = media.file_id
-    file_name = media.file_name or "file"
+    file_id = str(message.id)
+    file_name = media.file_name or f"{file_id}.bin"
+    save_path = f"./downloads/{file_id}_{file_name}"
 
-    # Encode file name for URL
-    safe_name = urllib.parse.quote(file_name)
-    message_id = message.id
+    await message.download(file_name=save_path)
 
-    # Custom link like: https://yourdomain.com/12345/CapCut+Pro.apk?hash=AgAD...
-    custom_link = f"{DOMAIN}/{message_id}/{safe_name}?hash={file_id}"
+    base_url = "https://yourapp.koyeb.app"  # ← yaha apna domain dalna
+    download_url = f"{base_url}/{file_id}/{file_name}"
+    watch_url = f"{base_url}/watch/{file_id}/{file_name}"
 
     await message.reply_text(
-        f"🔗 **Your Link is Ready:**\n"
-        f"[📥 Download or ▶️ Watch Here]({custom_link})",
+        f"📥 [Download Link]({download_url})\n▶️ [Watch Online]({watch_url})",
         disable_web_page_preview=True
     )
 
-bot.run()
+app.run()
