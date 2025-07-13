@@ -1,68 +1,18 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>Stream or Download</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <style>
-    body {
-      background-color: #0e0e0e;
-      color: #fff;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      text-align: center;
-      padding: 40px 10px;
-    }
-    h2 {
-      color: #00ffc3;
-      margin-bottom: 10px;
-    }
-    video {
-      width: 90%;
-      max-width: 900px;
-      border-radius: 10px;
-      box-shadow: 0 0 20px #000;
-    }
-    .buttons {
-      margin-top: 20px;
-    }
-    .btn {
-      background-color: #1f1f1f;
-      border: 1px solid #00ffc3;
-      padding: 10px 20px;
-      margin: 5px;
-      border-radius: 8px;
-      color: #00ffc3;
-      font-size: 16px;
-      text-decoration: none;
-      display: inline-block;
-      transition: background 0.3s;
-    }
-    .btn:hover {
-      background-color: #00ffc3;
-      color: #000;
-    }
-  </style>
+    <title>Watch Video</title>
 </head>
-<body>
+<body style="text-align:center;">
+    <h2>Streaming</h2>
+    <video width="90%" controls autoplay>
+        <source src="{{ video_url }}" type="video/mp4">
+        Your browser does not support HTML5 video.
+    </video>
 
-  <h2>🎬 Stream or Download Your File</h2>
-
-  <video controls autoplay>
-    <source src="{{ tg_cdn_url }}" type="video/mp4">
-    Your browser does not support the video tag.
-  </video>
-
-  <div class="buttons">
-    <a href="{{ tg_cdn_url }}" class="btn" download>⬇️ Direct Download</a>
-
-    <!-- External Player Buttons -->
-    <a class="btn" href="intent:{{ tg_cdn_url }}#Intent;package=org.videolan.vlc;type=video/mp4;scheme=http;end">▶️ Play in VLC</a>
-    <a class="btn" href="intent:{{ tg_cdn_url }}#Intent;package=com.mxtech.videoplayer.ad;type=video/mp4;scheme=http;end">▶️ MX Player</a>
-    <a class="btn" href="intent:{{ tg_cdn_url }}#Intent;package=com.splayer.splayer;type=video/mp4;scheme=http;end">▶️ SPlayer</a>
-    <a class="btn" href="intent:{{ tg_cdn_url }}#Intent;package=com.playit.videoplayer;type=video/mp4;scheme=http;end">▶️ PlayIt</a>
-  </div>
-
-  <p style="margin-top: 30px; font-size: 14px; color: #aaa;">If buttons don’t work, copy link and open manually in your preferred player.</p>
-
+    <h3>External Player Links</h3>
+    <p>
+        <a href="{{ video_url }}">MX Player / VLC / SPlayer / PlayIt</a>
+    </p>
 </body>
-  </html>
+</html>
