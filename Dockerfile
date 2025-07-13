@@ -1,18 +1,31 @@
-# Base image
+# Use official Python image
 FROM python:3.11-slim
 
-# Set work directory
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
+# Create working directory
 WORKDIR /app
 
-# Install dependencies
+# Install system dependencies (for pyrogram + flask)
+RUN apt-get update && apt-get install -y \
+    gcc \
+    libffi-dev \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements first to install deps
 COPY requirements.txt .
+
+# Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy source code
+# Copy the rest of the app
 COPY . .
 
-# Expose FastAPI port
-EXPOSE 8000
+# Expose Flask port
+EXPOSE 5000
 
-# Start the bot and web server together
-CMD ["python", "main.py"]
+# Start both: Telegram bot & Flask server
+CMD ["sh", "-c", "python stream_server.py & python bot.py"]
